@@ -5,12 +5,15 @@ function main() {
 	const canvas = document.querySelector('#c');
 	const renderer = new THREE.WebGLRenderer({ antialias: true, canvas });
 
-	const fov = 75;
+	const fov = 90;
 	const aspect = 2; // the canvas default
 	const near = 0.1;
-	const far = 5;
+	const far = 100;
 	const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-	camera.position.z = 2;
+	camera.position.z = 5;
+	camera.position.y = 1;
+	camera.position.x = 0;
+
 
 	const scene = new THREE.Scene();
 
@@ -29,24 +32,49 @@ function main() {
 	const boxDepth = 1;
 	const geometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
 
-	function makeInstance(geometry, color, x) {
+	function makeInstance(geometry, color, x, y, z) {
+		const loader = new THREE.TextureLoader();
+		/**
+		loader.load('textures/cube.jpg', (texture) => {
+			texture.colorSpace = THREE.SRGBColorSpace;
+			const material = new THREE.MeshBasicMaterial({
+				map: texture,
+			});
+			const cube = new THREE.Mesh(geometry, material);
+			scene.add(cube);
 
+			cube.position.x = x;
+			cube.position.y = y;
+			cube.position.z = z;
+
+			return cube;
+		});
+		*/
 		const material = new THREE.MeshPhongMaterial({ color });
 
 		const cube = new THREE.Mesh(geometry, material);
 		scene.add(cube);
 
 		cube.position.x = x;
+		cube.position.y = y;
+		cube.position.z = z;
 
 		return cube;
-
 	}
 
-	const cubes = [
-		makeInstance(geometry, 0x44aa88, 0),
-		makeInstance(geometry, 0x8844aa, - 2),
-		makeInstance(geometry, 0xaa8844, 2),
-	];
+	// Create cubes 
+	const cubes = [];
+	const gridRows = 10;
+	const gridCols = 10;
+
+	for (let i = 0; i < gridRows; i++) {
+		for (let j = 0; j < gridCols; j++) {
+			const x = j - (gridRows / 2);
+			const z = i - (gridCols / 2);
+			const color = new THREE.Color(Math.random(), Math.random(), Math.random());
+			cubes.push(makeInstance(geometry, color, x, 0, z));
+		}
+	}
 
 	function resizeRendererToDisplaySize(renderer) {
 		const canvas = renderer.domElement;
@@ -69,14 +97,6 @@ function main() {
 			camera.updateProjectionMatrix();
 		}
 
-		cubes.forEach((cube, ndx) => {
-
-			const speed = 1  * .1;
-			const rot = time * speed;
-			cubes.rotation.x = rot;
-			cubes.rotation.y = rot;
-
-		});
 
 		renderer.render(scene, camera);
 
