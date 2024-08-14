@@ -1,4 +1,5 @@
 import * as THREE from 'https://threejs.org/build/three.module.js';
+import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 
 function main() {
 
@@ -64,13 +65,13 @@ function main() {
 
 	// Create cubes 
 	const cubes = [];
-	const gridRows = 10;
-	const gridCols = 10;
+	const gridRows = 100;
+	const gridCols = 100;
 
 	for (let i = 0; i < gridRows; i++) {
 		for (let j = 0; j < gridCols; j++) {
-			const x = j - (gridRows / 2);
-			const z = i - (gridCols / 2);
+			const x = (j - (gridRows / 2));
+			const z = (i - (gridCols / 2));
 			const color = new THREE.Color(Math.random(), Math.random(), Math.random());
 			cubes.push(makeInstance(geometry, color, x, 0, z));
 		}
@@ -86,6 +87,33 @@ function main() {
 		}
 		return needResize;
 	}
+
+	// instantiate a loader
+	const loader = new OBJLoader();
+
+	// load a resource
+	loader.load(
+		// resource URL
+		'models/T-Rex.obj',
+		// called when resource is loaded
+		function (object) {
+
+			scene.add(object);
+
+		},
+		// called when loading is in progresses
+		function (xhr) {
+
+			console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+
+		},
+		// called when loading has errors
+		function (error) {
+
+			console.log('An error happened');
+
+		}
+	);
 
 	function render(time) {
 
