@@ -1,33 +1,19 @@
 import * as THREE from 'https://threejs.org/build/three.module.js';
 
 export function createVoxelGrid(scene) {
-    const gridSize = 1000;  // Number of cubes along one axis
-    const cubeSize = 0.1;  // Size of each cube
-    const totalCubes = gridSize * gridSize;
+    const gridSize = 100;  // Number of cubes along one axis
+    const cubeSize = 1;  // Size of each cube
+    const heightSize = 10;  // Size of each cube
+    const totalCubes = gridSize * gridSize * heightSize;  // Total number of cubes
 
     const geometry = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize);
 
     // Custom Shader Material
-    const material = new THREE.ShaderMaterial({
-        vertexShader: `
-            attribute vec3 aInstanceColor;
-            varying vec3 vColor;
-            void main() {
-                vColor = aInstanceColor;
-                vec4 mvPosition = modelViewMatrix * instanceMatrix * vec4(position, 1.0);
-                gl_Position = projectionMatrix * mvPosition;
-            }
-        `,
-        fragmentShader: `
-            varying vec3 vColor;
-            void main() {
-                gl_FragColor = vec4(vColor, 1.0);
-            }
-        `,
-        side: THREE.FrontSide,  // Ensure only the front faces are rendered
-        transparent: false,      // Disable transparency to avoid seeing through cubes
-        uniforms: {},
-    });
+    const material = new THREE.MeshBasicMaterial({
+        color: 0x00ff00,
+        wireframe: true,  // Enable wireframe mode
+        side: THREE.FrontSide  // Ensure only front faces are rendered
+      });
 
     const instancedMesh = new THREE.InstancedMesh(geometry, material, totalCubes);
 
@@ -35,22 +21,24 @@ export function createVoxelGrid(scene) {
     const dummy = new THREE.Object3D();
 
     let index = 0;
-    for (let i = 0; i < gridSize; i++) {
-        for (let j = 0; j < gridSize; j++) {
-            // Set the position of each cube
-            dummy.position.set(
-                (j - gridSize / 2) * cubeSize,
-                0,
-                (i - gridSize / 2) * cubeSize
-            );
-            dummy.updateMatrix();
-            instancedMesh.setMatrixAt(index, dummy.matrix);
+    for (let x = 0; x < gridSize; x++) {
+        for (let y = 0; y < gridSize; y++) {
+            for (let z = 0; z < heightSize; z++) {
+                // Set the position of each cube
+                dummy.position.set(
+                    (x - gridSize / 2) * cubeSize,
+                    (z - heightSize / 2) * cubeSize,
+                    (y - gridSize / 2) * cubeSize
+                );
+                dummy.updateMatrix();
+                instancedMesh.setMatrixAt(index, dummy.matrix);
 
-            // Assign a random color to each cube
-            const color = new THREE.Color(Math.random(), Math.random(), Math.random());
-            colors.set(color.toArray(), index * 3);
+                // Assign a random color to each cube
+                const color = new THREE.Color(Math.random(), Math.random(), Math.random());
+                colors.set(color.toArray(), index * 3);
 
-            index++;
+                index++;
+            }
         }
     }
 
@@ -58,6 +46,6 @@ export function createVoxelGrid(scene) {
     instancedMesh.instanceColor = new THREE.InstancedBufferAttribute(colors, 3);
     // Assign the custom attribute
     instancedMesh.geometry.setAttribute('aInstanceColor', instancedMesh.instanceColor);
-
+    
     scene.add(instancedMesh);
 }
