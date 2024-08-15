@@ -8,16 +8,18 @@ export function createVoxelGrid(scene) {
 
     const geometry = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize);
 
+    geometry.scale(1, 1, -1);  // Flip the faces
+
     // Custom Shader Material
-    const material = new THREE.MeshBasicMaterial({
-        color: 0x00ff00,
-        wireframe: true,  // Enable wireframe mode
-        side: THREE.FrontSide  // Ensure only front faces are rendered
-      });
+    const material = new THREE.MeshBasicMaterial ({
+        color: 0x00ffff,
+        //wireframe: true,  // Enable wireframe mode
+        side: THREE.FrontSide,    // Ensure only front faces are rendered
+    });
 
     const instancedMesh = new THREE.InstancedMesh(geometry, material, totalCubes);
 
-    const colors = new Float32Array(totalCubes * 3); // RGB colors for each instance
+    const colors = new Float32Array(totalCubes * 4); // RGB colors for each instance
     const dummy = new THREE.Object3D();
 
     let index = 0;
@@ -35,8 +37,7 @@ export function createVoxelGrid(scene) {
 
                 // Assign a random color to each cube
                 const color = new THREE.Color(Math.random(), Math.random(), Math.random());
-                colors.set(color.toArray(), index * 3);
-
+                colors.set([color.r, color.g, color.b, 1], index * 4);
                 index++;
             }
         }
@@ -46,6 +47,6 @@ export function createVoxelGrid(scene) {
     instancedMesh.instanceColor = new THREE.InstancedBufferAttribute(colors, 3);
     // Assign the custom attribute
     instancedMesh.geometry.setAttribute('aInstanceColor', instancedMesh.instanceColor);
-    
+
     scene.add(instancedMesh);
 }

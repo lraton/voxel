@@ -20,15 +20,11 @@ function main() {
 
     // Create controls to allow camera manipulation with mouse
     const controls = new OrbitControls(camera, renderer.domElement);
+    // Update controls to apply the initial camera position
+    controls.update();
 
     // Create the scene
     const scene = createScene();
-
-    // Set initial camera position
-    camera.position.set(0, 20, 10);
-
-    // Update controls to apply the initial camera position
-    controls.update();
 
     // Set up lighting in the scene
     createLighting(scene);
